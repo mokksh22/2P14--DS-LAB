@@ -1,0 +1,255 @@
+// Q1.
+#include <iostream>
+using namespace std;
+
+class MyStack {
+private:
+    static const int CAPACITY = 100;
+    int elements[CAPACITY];
+    int topIndex;
+
+public:
+    MyStack() {
+        topIndex = -1;
+    }
+
+    void push(int val) {
+        if (isFull()) {
+            cout << "Stack Overflow: Cannot insert " << val << endl;
+            return;
+        }
+        elements[++topIndex] = val;
+        cout << val << " pushed successfully.\n";
+    }
+
+    void pop() {
+        if (isEmpty()) {
+            cout << "Stack Underflow: Nothing to remove.\n";
+            return;
+        }
+        cout << "Popped: " << elements[topIndex--] << endl;
+    }
+
+    bool isEmpty() {
+        return topIndex == -1;
+    }
+
+    bool isFull() {
+        return topIndex == CAPACITY - 1;
+    }
+
+    void showStack() {
+        if (isEmpty()) {
+            cout << "Stack is empty.\n";
+            return;
+        }
+        cout << "Stack (top → bottom): ";
+        for (int i = topIndex; i >= 0; i--)
+            cout << elements[i] << " ";
+        cout << endl;
+    }
+
+    void topElement() {
+        if (isEmpty()) {
+            cout << "No element on top.\n";
+            return;
+        }
+        cout << "Top element = " << elements[topIndex] << endl;
+    }
+};
+
+int main() {
+    MyStack st;
+    int option, val;
+
+    while (true) {
+        cout << "\n*** Stack Operations ***\n";
+        cout << "1. Push\n2. Pop\n3. Is Empty?\n4. Is Full?\n5. Display\n6. Peek\n7. Exit\n";
+        cout << "Choose: ";
+        cin >> option;
+
+        switch (option) {
+            case 1:
+                cout << "Enter value: ";
+                cin >> val;
+                st.push(val);
+                break;
+            case 2:
+                st.pop();
+                break;
+            case 3:
+                cout << (st.isEmpty() ? "Yes, empty.\n" : "Not empty.\n");
+                break;
+            case 4:
+                cout << (st.isFull() ? "Yes, full.\n" : "Not full.\n");
+                break;
+            case 5:
+                st.showStack();
+                break;
+            case 6:
+                st.topElement();
+                break;
+            case 7:
+                cout << "Exiting...\n";
+                return 0;
+            default:
+                cout << "Invalid choice!\n";
+        }
+    }
+}
+
+//Q2.
+#include <iostream>
+using namespace std;
+
+void reverseArray(char arr[], int last) {
+    int i = 0, j = last;
+    while (i < j) {
+        swap(arr[i], arr[j]);
+        i++, j--;
+    }
+}
+
+int main() {
+    char arr[100];
+    int top = -1;
+    string input;
+
+    cout << "Enter a string: ";
+    cin >> input;
+
+    for (char c : input) 
+        arr[++top] = c;
+
+    reverseArray(arr, top);
+
+    cout << "Reversed: ";
+    for (int i = 0; i <= top; i++) 
+        cout << arr[i];
+}
+
+//Q3.
+#include <iostream>
+using namespace std;
+
+int main() {
+    char stk[100];
+    int t = -1;
+    string expr;
+
+    cout << "Enter expression: ";
+    cin >> expr;
+
+    for (char c : expr) {
+        if (c == '(') {
+            stk[++t] = c; // push
+        } else if (c == ')') {
+            if (t == -1) {
+                cout << "Unbalanced Expression\n";
+                return 0;
+            }
+            t--; // pop
+        }
+    }
+
+    if (t == -1)
+        cout << "Balanced Expression\n";
+    else
+        cout << "Unbalanced Expression\n";
+}
+
+Q4.
+#include <iostream>
+#include <cctype>
+using namespace std;
+
+#define SIZE 100
+
+struct CharStack {
+    char arr[SIZE];
+    int top = -1;
+    void push(char c){ if(top < SIZE-1) arr[++top] = c; }
+    char pop(){ return (top >= 0) ? arr[top--] : '\0'; }
+    char peek(){ return (top >= 0) ? arr[top] : '\0'; }
+    bool empty(){ return top == -1; }
+};
+
+int precedence(char c) {
+    if(c == '^') return 3;
+    if(c == '*' || c == '/') return 2;
+    if(c == '+' || c == '-') return 1;
+    return -1;
+}
+
+bool isRightAssoc(char c) {
+    return c == '^';
+}
+
+string infixToPostfix(string exp) {
+    CharStack st;
+    string res = "";
+    for(char c : exp) {
+        if(isalnum(c)) res += c;
+        else if(c == '(') st.push(c);
+        else if(c == ')') {
+            while(!st.empty() && st.peek() != '(')
+                res += st.pop();
+            st.pop(); 
+        } else {
+            while(!st.empty() && ((precedence(st.peek()) > precedence(c)) ||
+                  (precedence(st.peek()) == precedence(c) && !isRightAssoc(c))) && st.peek() != '(')
+                res += st.pop();
+            st.push(c);
+        }
+    }
+    while(!st.empty()) res += st.pop();
+    return res;
+}
+
+int main() {
+    string exp;
+    cin >> exp;
+    cout << infixToPostfix(exp);
+}
+
+//Q5.
+#include <iostream>
+#include <sstream>
+using namespace std;
+
+#define MAX 100
+
+struct IntStack {
+    int arr[MAX];
+    int top = -1;
+    void push(int val){ if(top < MAX-1) arr[++top] = val; }
+    int pop(){ return (top >= 0) ? arr[top--] : 0; }
+};
+
+int evalPostfix(string expr) {
+    IntStack st;
+    string token;
+    stringstream ss(expr);
+
+    while(ss >> token) {
+        if(isdigit(token[0])) {
+            st.push(stoi(token));
+        } else {
+            int b = st.pop();
+            int a = st.pop();
+            switch(token[0]) {
+                case '+': st.push(a+b); break;
+                case '-': st.push(a-b); break;
+                case '*': st.push(a*b); break;
+                case '/': st.push(a/b); break;
+            }
+        }
+    }
+    return st.pop();
+}
+
+int main() {
+    string postfix;
+    getline(cin, postfix);
+    cout << evalPostfix(postfix);
+}
